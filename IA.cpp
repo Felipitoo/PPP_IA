@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <map>
 
-
+using namespace std;
 
 std::vector<std::pair<int,int>  > sorted_crews(std::vector<int> trip, std::vector<int> caps){
     std::vector<std::pair<int, int> > vp; 
