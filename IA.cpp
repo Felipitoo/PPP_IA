@@ -63,12 +63,7 @@ std::vector<std::pair<int,int>> sorted_crews_ascending(std::vector<int> trip, st
 
     return vp;
 }
-// Clase que guarda la matriz de instancia completa (G filas, T columnas, H valores posibles para cada celda)
-class Dominio {
-    vector <vector<int>> matrix_de_hosts;
 
-
-};
 
 vector<vector<int>> init_visitados(int invitados){
     vector<vector<int>> visitados(invitados);
@@ -197,12 +192,54 @@ vector<vector<int>> actualizar_visitados(vector<vector<int>> solucion, int perio
 
 }
 
-void actualizar_costos(vector<vector<int>> solucion, int periodos, int yates){
-    
+vector<vector<int>> actualizar_capacidades(vector<vector<int>> solucion, int periodos, int yates, vector<int> disp, vector<int> trips){
+    vector<vector<int>> capacidades_periodo(yates);
+    int i,j;
+    for(i = 0 ; i < yates; i++){
+        capacidades_periodo[i].resize(periodos);
 
+    }
+
+    for(i = 0;i <yates; i++){
+        for(j = 0;j < periodos; j++){
+            capacidades_periodo[i][j] = -disp[i];
+        }
+
+    }
+    
+    for(j = 0;j < periodos; j++){
+        for(i = 0 ; i < yates; i++){
+            if (solucion[i][j] != -1){
+                capacidades_periodo[solucion[i][j]][j] = capacidades_periodo[solucion[i][j]][j] + trips[i];
+            } 
+        }
+    }
+
+    return capacidades_periodo;
 }
 
+void forzar_restriccion_no_visito(vector<vector<int>>& solucion, vector<vector<int>>& dispo, int periodos, int yates, vector<int> trips){
+    vector<vector<int>> host_periodos(periodos); 
 
+    for(int j = 0; j < solucion[0].size(); j++){
+        vector<int> hosts_periodo;
+        for(int i = 0; i < solucion.size(); i++ ){
+            if(std::find(hosts_periodo.begin(), hosts_periodo.end(), solucion[i][j]) != hosts_periodo.end()) {
+                hosts_periodo.push_back(solucion[i][j]);
+            }
+        }
+    }
+
+     for (int j = 0; j < periodos ; j++){
+        for(int i = 0; i < yates ; i++){
+            if (host_periodos[j][i] == 1){
+                solucion[i][j] = -1;
+                dispo[i][j] = dispo[i][j] + trips[i];
+            }
+        }
+    }
+
+}
 
 
 // Genera solucion greedy que relaja restriccion de dos invitados no pueden volver a verse
@@ -263,9 +300,41 @@ vector<vector<int>> greedy(vector<int> trip, vector<int> caps, int periodos, int
     return solucion_greedy;
 }
 
-int funcion_costos(vector<vector<int>> solucion_candidata){
-    int costo;
-    
+int funcion_costos(vector<vector<int>> solucion_candidata, vector<vector<int>> disp_periodos, vector<vector<int>> visitados, int yates, int periodos){
+    int costo ,i,j,init;
+    int rotas_dispo, rotas_visitas;
+    rotas_dispo = 0;
+    rotas_visitas = 0;
+    vector<int> aux;
+    costo = 0;
+    for(init = 0; init < yates; init++){
+        aux.push_back(init);
+    }
+    vector<int> aux2;
+    aux2 = aux;
+    for(i = 0 ; i < aux.size() ; i++){
+        aux2.erase(std::remove(aux2.begin(), aux2.end(), i), aux2.end());
+        for(j = 0; j < aux2.size(); j++){
+            if(visitados[aux[i]][aux2[j]] > 1){
+                rotas_visitas = visitados[aux[i]][aux2[j]] - 1 ;
+            }
+        }
+    }
+
+    print_matrix(disp_periodos);
+
+    for(j = 0 ; j < periodos ; j++){
+        for(i = 0; i < yates; i++){
+            if(disp_periodos[i][j] < 0){
+                rotas_dispo = 0;
+            }
+        }
+    }
+
+   
+
+    costo = rotas_dispo * 4 + rotas_visitas * 2 ;
+
     return costo;
 
 }
@@ -273,7 +342,8 @@ int funcion_costos(vector<vector<int>> solucion_candidata){
 
 void greedy_HC_peque(vector<int> trip, vector<int> caps, int periodos, int yates){
     int invitados = trip.size();
-
+    vector<int> disponibilidad;
+    std::transform(caps.begin(), caps.end(), trip.begin(), std::back_inserter(disponibilidad), std::minus<int>());
     vector<vector<int>> matrix(invitados);
     for ( int i = 0 ; i < invitados ; i++ ){
         matrix[i].resize(periodos);
@@ -281,12 +351,15 @@ void greedy_HC_peque(vector<int> trip, vector<int> caps, int periodos, int yates
 
     vector<pair<int,int>> ordenados; 
     
+    vector<vector<int>> visitados_sc;
+    vector<vector<int>> disponibles_sc;
     vector<vector<int>> solucion_candidata;
     vector<vector<int>> sol_inicial(invitados);
     solucion_candidata = greedy(trip,caps,periodos,yates);
-    print_matrix(solucion_candidata);
  
-    actualizar_visitados(solucion_candidata,periodos,yates);
+    visitados_sc = actualizar_visitados(solucion_candidata,periodos,yates);
+    disponibles_sc = actualizar_capacidades(solucion_candidata,periodos,yates,disponibilidad,trip);
+    funcion_costos(solucion_candidata,disponibles_sc,visitados_sc,yates,periodos);
 
 
 
