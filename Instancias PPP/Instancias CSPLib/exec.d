@@ -1,1 +1,0 @@
-exec: IA.cpp
