@@ -459,6 +459,8 @@ void greedy_HC_original(vector<int> trip, vector<int> caps, int periodos, int ya
 
     while (restarts < 250 ){
         int mejora = 1;
+        cout << "Restart " << restarts << " iniciado \n" ;
+
         vector<vector<int>> s_n;
         if (restarts != 0){
             solucion_candidata = solucion_random(periodos,yates,hosts,invitados);

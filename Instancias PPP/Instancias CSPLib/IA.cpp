@@ -537,6 +537,7 @@ void greedy_HC_peque(vector<int> trip, vector<int> caps, int periodos, int yates
     while (restarts < 250 ){
         int mejora = 1;
         vector<vector<int>> s_n;
+        cout << "Restart " << restarts << " iniciado \n" ;
         hosts_designados = actualizar_hosts(trip,caps,periodos,disponibilidad) ;
         if (restarts != 0){
             solucion_candidata = solucion_restart_especial(periodos,yates,ordenados,caps,trip,hosts_designados);
