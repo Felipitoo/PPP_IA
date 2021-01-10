@@ -454,13 +454,11 @@ void greedy_HC_original(vector<int> trip, vector<int> caps, int periodos, int ya
     vector<vector<int>> solucion_candidata;
 
     solucion_greedy = greedy(trip,caps,periodos,yates,hosts,invitados);
-    print_matrix(solucion_greedy);
     
 
 
     while (restarts < 250 ){
         int mejora = 1;
-        cout << restarts << "\n";
         vector<vector<int>> s_n;
         if (restarts != 0){
             solucion_candidata = solucion_random(periodos,yates,hosts,invitados);
@@ -481,7 +479,6 @@ void greedy_HC_original(vector<int> trip, vector<int> caps, int periodos, int ya
             
             
             if (costo_n < costo_sc ){
-                cout << costo_n << "\n";
                 solucion_candidata = s_n ;
             }
             else{
